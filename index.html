@@ -69,11 +69,14 @@ h3{margin:18px 0 6px;font-size:1rem}
 .menuobras .opc{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:#fff;padding:12px 14px;font-weight:600;cursor:pointer}
 .menuobras .opc:last-child{border-bottom:0}
 .menuobras .opc.on{background:var(--dark);color:#fff}
+.caixa .senha{position:relative}
+.caixa .senha input{padding-right:52px}
+.olho{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;font-size:1.4rem;line-height:1;padding:8px 10px;cursor:pointer}
 @media print{header,nav,.aviso,.barra,.modal,.nao-imp{display:none!important}body{background:#fff}main{box-shadow:none;padding:0}}
 </style>
 </head>
 <body>
-<header><h1>🏗️ Controle de Obras <small style="font-weight:400;font-size:.65rem;opacity:.7">v6</small></h1><button class="adm" id="btnAdm">🔒 Administrador</button></header>
+<header><h1>🏗️ Controle de Obras <small style="font-weight:400;font-size:.65rem;opacity:.7">v7</small></h1><button class="adm" id="btnAdm">🔒 Administrador</button></header>
 <div class="aviso" id="aviso" hidden></div>
 <nav id="tabs">
   <button data-t="estoque" class="on">Estoque</button>
@@ -85,7 +88,7 @@ h3{margin:18px 0 6px;font-size:1rem}
 </nav>
 <main id="main"></main>
 <div class="modal" id="modal" hidden><div class="caixa" id="caixa"></div></div>
-<script src="config.js?v=6"></script>
+<script src="config.js?v=7"></script>
 <script>
 var API = window.API_URL || "";
 var D = null, ADM = null, TAB = "estoque", OBRA = "todas", BUSCA = "", HBUSCA = "", HOBRA = "", OCUP = false;
@@ -163,8 +166,9 @@ $("modal").addEventListener("click",function(e){
 /* ===== administrador ===== */
 $("btnAdm").onclick=function(){
   if(ADM){ADM=null;if(["cad","rel"].indexOf(TAB)>-1)TAB="estoque";desenhar();return}
-  abrir('<h2>Entrar como administrador</h2><label for="sn">Senha</label><input id="sn" type="password" autocomplete="current-password"><div id="erro" class="erro"></div><div class="acoes"><button class="btn sec" onclick="fechar()">Cancelar</button><button class="btn" id="oksn">Entrar</button></div>');
+  abrir('<h2>Entrar como administrador</h2><label for="sn">Senha</label><div class="senha"><input id="sn" type="password" autocomplete="current-password"><button type="button" class="olho" id="olho" title="Mostrar ou ocultar a senha">👁️</button></div><div id="erro" class="erro"></div><div class="acoes"><button class="btn sec" onclick="fechar()">Cancelar</button><button class="btn" id="oksn">Entrar</button></div>');
   $("sn").focus();
+  $("olho").onclick=function(){var i=$("sn"),ver=i.type==="password";i.type=ver?"text":"password";this.textContent=ver?"🙈":"👁️";i.focus()};
   function entrar(){
     var s=$("sn").value;if(!s||OCUP)return;
     ADM=s;travar(true);
