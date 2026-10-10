@@ -64,11 +64,16 @@ h3{margin:18px 0 6px;font-size:1rem}
 .pv{display:flex;gap:6px;align-items:center;margin-bottom:8px}.pv input{padding:9px;border:2px solid var(--line);border-radius:10px;min-width:0}
 .pv .n{flex:3}.pv .q{flex:1;min-width:64px}.pv .x{flex:none;border:0;background:#fee2e2;color:var(--no);border-radius:10px;width:36px;height:38px;font-weight:800;cursor:pointer}
 .dica{font-size:.72rem;color:#92400e}
+.menuobras{border:2px solid var(--line);border-radius:12px;background:#fff;margin:0 0 10px;max-height:50vh;overflow-y:auto;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.menuobras[hidden]{display:none}
+.menuobras .opc{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:#fff;padding:12px 14px;font-weight:600;cursor:pointer}
+.menuobras .opc:last-child{border-bottom:0}
+.menuobras .opc.on{background:var(--dark);color:#fff}
 @media print{header,nav,.aviso,.barra,.modal,.nao-imp{display:none!important}body{background:#fff}main{box-shadow:none;padding:0}}
 </style>
 </head>
 <body>
-<header><h1>🏗️ Controle de Obras <small style="font-weight:400;font-size:.65rem;opacity:.7">v5</small></h1><button class="adm" id="btnAdm">🔒 Administrador</button></header>
+<header><h1>🏗️ Controle de Obras <small style="font-weight:400;font-size:.65rem;opacity:.7">v6</small></h1><button class="adm" id="btnAdm">🔒 Administrador</button></header>
 <div class="aviso" id="aviso" hidden></div>
 <nav id="tabs">
   <button data-t="estoque" class="on">Estoque</button>
@@ -80,7 +85,7 @@ h3{margin:18px 0 6px;font-size:1rem}
 </nav>
 <main id="main"></main>
 <div class="modal" id="modal" hidden><div class="caixa" id="caixa"></div></div>
-<script src="config.js?v=5"></script>
+<script src="config.js?v=6"></script>
 <script>
 var API = window.API_URL || "";
 var D = null, ADM = null, TAB = "estoque", OBRA = "todas", BUSCA = "", HBUSCA = "", HOBRA = "", OCUP = false;
@@ -181,11 +186,11 @@ function desenhar(){
   Array.prototype.forEach.call($("tabs").children,function(b){b.classList.toggle("on",b.dataset.t===TAB)});
   if(TAB==="estoque")telaEstoque();else if(TAB==="transf")telaTransf();else if(TAB==="hist")telaHist();else if(TAB==="comb")telaComb();else if(TAB==="rel")telaRel();else telaCad();
 }
-function chipsObras(atual,incluiTodas,fn){
-  var h='<div class="chips">';
-  if(incluiTodas)h+='<button class="chip '+(atual===incluiTodas?"on":"")+'" data-o="'+incluiTodas+'">'+(incluiTodas==="todas"?"Todas as obras":"Todas")+'</button>';
-  obrasAtivas().forEach(function(o){h+='<button class="chip '+(atual===o.id?"on":"")+'" data-o="'+esc(o.id)+'">'+esc(o.nome)+(o.ativa?"":" (arquivada)")+'</button>'});
-  return h+'</div>';
+function chipsObras(atual,todas){
+  var h='<div class="chips"><button class="chip '+(atual===todas?"on":"")+'" data-o="'+todas+'">Todas as obras</button><button class="chip '+(atual!==todas?"on":"")+'" data-a="menuobras">Ver obras ▾</button></div>';
+  h+='<div class="menuobras" id="menuobras" hidden>'+obrasAtivas().map(function(o){return '<button class="opc '+(atual===o.id?"on":"")+'" data-o="'+esc(o.id)+'">'+esc(o.nome)+(o.ativa?"":" (arquivada)")+'</button>'}).join("")+'</div>';
+  if(atual!==todas)h+='<div class="sub">Obra: <b>'+esc(nomeObra(atual))+'</b></div>';
+  return h;
 }
 
 function telaEstoque(){
@@ -425,11 +430,12 @@ function baixarCsv(){
 
 /* ===== ações nos botões ===== */
 $("main").addEventListener("click",function(e){
-  var c=e.target.closest(".chip");
+  var c=e.target.closest("[data-o]");
   if(c){if(TAB==="estoque"){OBRA=c.dataset.o;telaEstoque()}return}
   var b=e.target.closest("[data-a]");if(!b)return;
   var a=b.dataset.a,v=b.dataset.v;
-  if(a==="mov")formMov(v,"");
+  if(a==="menuobras"){var mo=$("menuobras");mo.hidden=!mo.hidden}
+  else if(a==="mov")formMov(v,"");
   else if(a==="item")menuItem(v);
   else if(a==="lote")formLote();
   else if(a==="novo")formNovoItem();
@@ -573,6 +579,11 @@ function formTransf(){
     acao({acao:"transf_criar",origem:$("to").value,destino:$("td").value,itens:itens,obs:$("tobs").value});
   };
 }
+
+document.addEventListener("click",function(e){
+  var m=$("menuobras");
+  if(m&&!m.hidden&&!e.target.closest("#menuobras")&&!e.target.closest('[data-a="menuobras"]'))m.hidden=true;
+});
 
 /* início */
 try{D=JSON.parse(localStorage.getItem("co_dados"))}catch(e){}
