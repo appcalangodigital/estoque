@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1f2937">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Obras">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <title>Controle de Obras</title>
@@ -12,7 +19,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px}
 button,input,select,textarea{font:inherit;color:inherit}
-header{background:var(--dark);color:#fff;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+header{flex-wrap:wrap;background:var(--dark);color:#fff;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 header h1{font-size:1.15rem;margin:0}
 .adm{border:0;border-radius:999px;padding:8px 14px;background:rgba(255,255,255,.14);color:#fff;font-weight:600;font-size:.85rem;cursor:pointer}
 .adm.on{background:var(--acc);color:var(--acc-ink)}
@@ -76,7 +83,7 @@ h3{margin:18px 0 6px;font-size:1rem}
 </style>
 </head>
 <body>
-<header><h1>🏗️ Controle de Obras <small style="font-weight:400;font-size:.65rem;opacity:.7">v7</small></h1><button class="adm" id="btnAdm">🔒 Administrador</button></header>
+<header><h1>🏗️ Controle de Obras <small style="font-weight:400;font-size:.65rem;opacity:.7">v8</small></h1><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="adm" id="btnInst" hidden>📲 Instalar</button><button class="adm" id="btnAdm">🔒 Administrador</button></div></header>
 <div class="aviso" id="aviso" hidden></div>
 <nav id="tabs">
   <button data-t="estoque" class="on">Estoque</button>
@@ -88,7 +95,7 @@ h3{margin:18px 0 6px;font-size:1rem}
 </nav>
 <main id="main"></main>
 <div class="modal" id="modal" hidden><div class="caixa" id="caixa"></div></div>
-<script src="config.js?v=7"></script>
+<script src="config.js?v=8"></script>
 <script>
 var API = window.API_URL || "";
 var D = null, ADM = null, TAB = "estoque", OBRA = "todas", BUSCA = "", HBUSCA = "", HOBRA = "", OCUP = false;
@@ -588,6 +595,18 @@ document.addEventListener("click",function(e){
   var m=$("menuobras");
   if(m&&!m.hidden&&!e.target.closest("#menuobras")&&!e.target.closest('[data-a="menuobras"]'))m.hidden=true;
 });
+
+/* ===== instalar como app ===== */
+var PROMPT=null;
+function emApp(){return (window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();PROMPT=e});
+window.addEventListener("appinstalled",function(){PROMPT=null;$("btnInst").hidden=true});
+if(!emApp())$("btnInst").hidden=false;
+$("btnInst").onclick=function(){
+  if(PROMPT){PROMPT.prompt();PROMPT.userChoice.then(function(){PROMPT=null})}
+  else alert("Para instalar:\n\nANDROID (Chrome): toque nos 3 pontinhos ⋮ e escolha \"Instalar app\" ou \"Adicionar à tela inicial\".\n\nIPHONE (Safari): toque no botão Compartilhar (quadrado com seta para cima) e escolha \"Adicionar à Tela de Início\".");
+};
+if("serviceWorker" in navigator)window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
 
 /* início */
 try{D=JSON.parse(localStorage.getItem("co_dados"))}catch(e){}
